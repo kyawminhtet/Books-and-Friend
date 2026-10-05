@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Books & Friends",
+    "slug": "books-and-friends",
+    "scheme": "booksandfriends",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-router", ["expo-image-picker", { "photosPermission": "Choose a profile photo to share with your reading circles.", "microphonePermission": false }]],
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.booksandfriends.app" },
+    "android": { "package": "com.booksandfriends.app" }
+  }
+}

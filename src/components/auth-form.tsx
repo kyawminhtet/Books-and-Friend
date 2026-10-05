@@ -1,0 +1,14 @@
+'use client';
+
+import { ArrowLeft, BookOpen } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
+import { getSupabase } from '@/lib/supabase';
+import { LanguageSelect, useI18n } from '@/i18n';
+
+export function AuthForm({ mode }: { mode: 'sign-in' | 'sign-up' }) {
+  const { t } = useI18n();
+  const [busy, setBusy] = useState(false); const [message, setMessage] = useState(''); const signup = mode === 'sign-up';
+  async function submit(e: React.FormEvent<HTMLFormElement>) { e.preventDefault(); const values = new FormData(e.currentTarget); setBusy(true); setMessage(''); const supabase = getSupabase(); if (!supabase) { setMessage(t('auth.setup')); setBusy(false); return; } const email = String(values.get('email')); const password = String(values.get('password')); const result = signup ? await supabase.auth.signUp({ email, password, options: { data: { display_name: String(values.get('name')).trim() } } }) : await supabase.auth.signInWithPassword({ email, password }); if (result.error) setMessage(result.error.message); else if (signup) setMessage(t('auth.confirm')); else window.location.href = '/'; setBusy(false); }
+  return <main className="auth-page"><div className="auth-card"><div className="auth-topline"><Link className="back-link" href="/"><ArrowLeft size={16} /> {t('auth.back')}</Link><LanguageSelect compact /></div><Link className="brand auth-brand" href="/"><span className="brand-mark"><BookOpen size={17} /></span> books <b>&</b> friends</Link><div className="eyebrow">{signup ? t('auth.signupEyebrow') : t('auth.signinEyebrow')}</div><h1>{signup ? t('auth.signupTitle') : t('auth.signinTitle')}</h1><p>{signup ? t('auth.signupText') : t('auth.signinText')}</p><form onSubmit={submit}>{signup && <label>{t('auth.name')}<input name="name" autoComplete="name" required maxLength={60} placeholder={t('auth.namePlaceholder')} /></label>}<label>{t('auth.email')}<input name="email" type="email" autoComplete="email" required placeholder={t('auth.emailPlaceholder')} /></label><label>{t('auth.password')}<input name="password" type="password" autoComplete={signup ? t('auth.passwordNew') : t('auth.passwordCurrent')} required minLength={8} placeholder={t('auth.passwordPlaceholder')} /></label>{!signup && <Link className="forgot-link" href="/auth/forgot-password">{t('auth.forgot')}</Link>}<button className="button button-dark auth-submit" disabled={busy}>{busy ? t('auth.loading') : signup ? t('auth.create') : t('auth.submit')} <span>↗</span></button></form>{message && <div className="form-message" role="status">{message}</div>}<div className="auth-switch">{signup ? t('auth.already') : t('auth.new')} <Link href={signup ? '/auth/sign-in' : '/auth/sign-up'}>{signup ? t('auth.switchSignin') : t('auth.switchSignup')}</Link></div></div></main>;
+}
